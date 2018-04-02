@@ -34,7 +34,7 @@ func (p *Plugin) GetConfigPolicy() (plugin.ConfigPolicy, error) {
 }
 
 func (p *Plugin) GetMetricTypes(plugin.Config) ([]plugin.Metric, error) {
-	mts := []plugin.Metric{}
+	var mts []plugin.Metric
 
 	ns := p.createDiskNamespaces()
 	for _, namespace := range ns {
@@ -56,7 +56,7 @@ func (p *Plugin) GetMetricTypes(plugin.Config) ([]plugin.Metric, error) {
 }
 
 func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error) {
-	mts := []plugin.Metric{}
+	var mts []plugin.Metric
 
 	if p.client == nil {
 		server, _ := metrics[0].Config.GetString(param_server)

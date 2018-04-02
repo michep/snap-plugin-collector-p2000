@@ -6,7 +6,7 @@ import (
 )
 
 func (p Plugin) createHostPortNamespaces() []plugin.Namespace {
-	ns := []plugin.Namespace{}
+	var ns []plugin.Namespace
 	metrics := []string{"iops", "bytespersecond", "numberofreads", "numberofwrites", "dataread", "datawritten", "queuedepth"}
 	for _, m := range metrics {
 		namespace := plugin.NewNamespace(PluginVedor, PluginName, "hostport")
@@ -19,7 +19,7 @@ func (p Plugin) createHostPortNamespaces() []plugin.Namespace {
 
 func (p *Plugin) getHostPortkMetricValues(metric plugin.Metric, now time.Time) ([]plugin.Metric, error) {
 	var err error
-	mts := []plugin.Metric{}
+	var mts []plugin.Metric
 	if p.hostportstat == nil {
 		p.hostportstat, err = p.client.GetHostPortStatistics()
 		if err != nil {

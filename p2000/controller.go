@@ -6,7 +6,7 @@ import (
 )
 
 func (p Plugin) createControllerNamespaces() []plugin.Namespace {
-	ns := []plugin.Namespace{}
+	var ns []plugin.Namespace
 	metrics := []string{"iops", "bytespersecond", "numberofreads", "numberofwrites", "dataread", "datawritten", "cpuload"}
 	for _, m := range metrics {
 		namespace := plugin.NewNamespace(PluginVedor, PluginName, "controller")
@@ -19,7 +19,7 @@ func (p Plugin) createControllerNamespaces() []plugin.Namespace {
 
 func (p *Plugin) getControllerMetricValues(metric plugin.Metric, now time.Time) ([]plugin.Metric, error) {
 	var err error
-	mts := []plugin.Metric{}
+	var mts []plugin.Metric
 	if p.ctlstat == nil {
 		p.ctlstat, err = p.client.GetControllerStatistics()
 		if err != nil {

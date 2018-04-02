@@ -6,7 +6,7 @@ import (
 )
 
 func (p Plugin) createDiskNamespaces() []plugin.Namespace {
-	ns := []plugin.Namespace{}
+	var ns []plugin.Namespace
 	metrics := []string{"iops", "bytespersecond", "numberofreads", "numberofwrites", "dataread", "datawritten", "totaldatatransferred", "health", "queuedepth"}
 	for _, m := range metrics {
 		namespace := plugin.NewNamespace(PluginVedor, PluginName, "drive")
@@ -19,7 +19,7 @@ func (p Plugin) createDiskNamespaces() []plugin.Namespace {
 
 func (p *Plugin) getDiskMetricValues(metric plugin.Metric, now time.Time) ([]plugin.Metric, error) {
 	var err error
-	mts := []plugin.Metric{}
+	var mts []plugin.Metric
 	if p.diskstat == nil {
 		p.diskstat, err = p.client.GetDiskStatistics()
 		if err != nil {
