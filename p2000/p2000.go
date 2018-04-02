@@ -3,6 +3,7 @@ package p2000
 import (
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"github.com/michep/snap-plugin-collector-p2000/parser"
+	"net/url"
 	"time"
 )
 
@@ -16,6 +17,7 @@ const (
 
 type Plugin struct {
 	client       *parser.Client
+	system       string
 	diskstat     map[string]parser.DiskStatistics
 	vdiskstat    map[string]parser.VdiskStatistics
 	ctlstat      map[string]parser.ControllerStatistics
@@ -61,6 +63,11 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 	if p.client == nil {
 		server, _ := metrics[0].Config.GetString(param_server)
 		authstr, _ := metrics[0].Config.GetString(param_authstr)
+		u, err := url.Parse(server)
+		if err != nil {
+			return nil, err
+		}
+		p.system = u.Hostname()
 		p.client = parser.NewClient(server, authstr)
 	}
 
@@ -77,6 +84,7 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 	}
 
 	for _, metric := range metrics {
+		metric.Tags = map[string]string{"system": p.system}
 		switch metric.Namespace[2].Value {
 		case "drive":
 			m, err := p.getDiskMetricValues(metric, now)

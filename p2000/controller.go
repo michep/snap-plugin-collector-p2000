@@ -29,10 +29,12 @@ func (p *Plugin) getControllerMetricValues(metric plugin.Metric, now time.Time) 
 
 	for name, stat := range p.ctlstat {
 		ns := plugin.NewNamespace()
-		for _, nse := range metric.Namespace {
-			ns = append(ns, nse)
+		tags := make(map[string]string)
+		ns = append(ns, metric.Namespace...)
+		for k, v := range metric.Tags {
+			tags[k] = v
 		}
-		m := plugin.Metric{Namespace: ns, Timestamp: now}
+		m := plugin.Metric{Namespace: ns, Timestamp: now, Tags: tags}
 		m.Namespace[3].Value = name
 		switch m.Namespace[4].Value {
 		case "iops":
