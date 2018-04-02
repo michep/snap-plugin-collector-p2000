@@ -22,8 +22,8 @@ func TestPlugin_CollectMetrics(t *testing.T) {
 	mts[0].Config = cfg
 
 	metrics, _ := p.CollectMetrics(mts)
-	fmt.Printf("%+v\n", len(metrics))
-	//for _, m := range metrics {
-	//	fmt.Printf("%+v\n", m)
-	//}
+	//fmt.Printf("%+v\n", len(metrics))
+	for _, m := range metrics {
+		fmt.Printf("%+v\n", m)
+	}
 }

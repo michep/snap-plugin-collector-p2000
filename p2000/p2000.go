@@ -15,10 +15,11 @@ const (
 )
 
 type Plugin struct {
-	client    *parser.Client
-	diskstat  map[string]parser.DiskStatistics
-	vdiskstat map[string]parser.VdiskStatistics
-	ctlstat   map[string]parser.ControllerStatistics
+	client       *parser.Client
+	diskstat     map[string]parser.DiskStatistics
+	vdiskstat    map[string]parser.VdiskStatistics
+	ctlstat      map[string]parser.ControllerStatistics
+	hostportstat map[string]parser.HostPortStatistics
 }
 
 func NewCollector() *Plugin {
@@ -47,6 +48,10 @@ func (p *Plugin) GetMetricTypes(plugin.Config) ([]plugin.Metric, error) {
 	for _, namespace := range ns {
 		mts = append(mts, plugin.Metric{Namespace: namespace})
 	}
+	ns = p.createHostPortNamespaces()
+	for _, namespace := range ns {
+		mts = append(mts, plugin.Metric{Namespace: namespace})
+	}
 	return mts, nil
 }
 
@@ -62,6 +67,7 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 	p.diskstat = nil
 	p.vdiskstat = nil
 	p.ctlstat = nil
+	p.hostportstat = nil
 
 	now := time.Now()
 
@@ -86,6 +92,12 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 			mts = append(mts, m...)
 		case "controller":
 			m, err := p.getControllerMetricValues(metric, now)
+			if err != nil {
+				return nil, err
+			}
+			mts = append(mts, m...)
+		case "hostport":
+			m, err := p.getHostPortkMetricValues(metric, now)
 			if err != nil {
 				return nil, err
 			}
