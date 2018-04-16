@@ -21,6 +21,7 @@ type Plugin struct {
 	diskstat     map[string]parser.DiskStatistics
 	vdiskstat    map[string]parser.VdiskStatistics
 	ctlstat      map[string]parser.ControllerStatistics
+	sensorstat   map[string]parser.SensorStatus
 	hostportstat map[string]parser.HostPortStatistics
 }
 
@@ -50,6 +51,10 @@ func (p *Plugin) GetMetricTypes(plugin.Config) ([]plugin.Metric, error) {
 	for _, namespace := range ns {
 		mts = append(mts, plugin.Metric{Namespace: namespace})
 	}
+	ns = p.createSensorStatusNamespaces()
+	for _, namespace := range ns {
+		mts = append(mts, plugin.Metric{Namespace: namespace})
+	}
 	ns = p.createHostPortNamespaces()
 	for _, namespace := range ns {
 		mts = append(mts, plugin.Metric{Namespace: namespace})
@@ -74,6 +79,7 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 	p.diskstat = nil
 	p.vdiskstat = nil
 	p.ctlstat = nil
+	p.sensorstat = nil
 	p.hostportstat = nil
 
 	now := time.Now()
@@ -100,6 +106,12 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 			mts = append(mts, m...)
 		case "controller":
 			m, err := p.getControllerMetricValues(metric, now)
+			if err != nil {
+				return nil, err
+			}
+			mts = append(mts, m...)
+		case "sensor":
+			m, err := p.getSensorStatusMetricValues(metric, now)
 			if err != nil {
 				return nil, err
 			}

@@ -48,3 +48,12 @@ func Test_VdiskStatisticsAPI(t *testing.T) {
 	fmt.Printf("%+v\n", len(data))
 	fmt.Println(time.Now().Sub(start))
 }
+
+func Test_SensorStatusAPI(t *testing.T) {
+	start := time.Now()
+	cl := NewClient("http://172.16.18.31:80", "0e4997806bb599dec1864e034f9e59f9")
+	cl.Login()
+	data, _ := cl.GetSensorStatus()
+	fmt.Printf("%+v\n", data)
+	fmt.Println(time.Now().Sub(start))
+}

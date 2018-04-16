@@ -128,6 +128,14 @@ func (c Client) GetVdiskStatistics() (map[string]VdiskStatistics, error) {
 	return stats, nil
 }
 
+func (c Client) GetSensorStatus() (map[string]SensorStatus, error) {
+	xmlresponse, err := c.readXMLData("show/sensor-status")
+	if err != nil {
+		return nil, err
+	}
+	return parseSensorStatus(*xmlresponse)
+}
+
 func (c Client) readXMLData(command string) (*apiResponse, error) {
 	var result apiResponse
 	resp, err := c.httpclient.Get(c.server + "/api/" + command)

@@ -1,10 +1,13 @@
 package parser
 
 import (
+	"regexp"
 	"strconv"
 )
 
-//import "encoding/xml"
+var (
+	re = regexp.MustCompile("[\\d\\.]+")
+)
 
 type apiResponse struct {
 	//XMLName xml.Name `xml:"RESPONSE"`
@@ -61,6 +64,13 @@ type HostPortStatistics struct {
 	Name       string
 	QueueDepth int64
 	statistics
+}
+
+type SensorStatus struct {
+	Name   string
+	Type   string
+	Status int64
+	Value  float64
 }
 
 type diskInfo struct {
@@ -252,6 +262,43 @@ func parseVdiskInfo(resp apiResponse) (map[string]vdiskInfo, error) {
 				}
 			}
 			res[name] = info
+		}
+	}
+	return res, nil
+}
+
+func parseSensorStatus(resp apiResponse) (map[string]SensorStatus, error) {
+	var v string
+	res := make(map[string]SensorStatus)
+loop:
+	for _, obj := range resp.Objects {
+		if obj.Basetype == "sensors" {
+			stat := SensorStatus{}
+			for _, prop := range obj.Properties {
+				switch prop.Name {
+				case "sensor-name":
+					stat.Name = prop.Value
+				case "status-numeric":
+					stat.Status, _ = strconv.ParseInt(prop.Value, 10, 64)
+				case "sensor-type":
+					switch {
+					case prop.Value == "2" || prop.Value == "Charge Capacity":
+						stat.Type = "charge"
+					case prop.Value == "3" || prop.Value == "Temperature":
+						stat.Type = "temp"
+					case prop.Value == "6" || prop.Value == "Current":
+						stat.Type = "current"
+					case prop.Value == "9" || prop.Value == "Voltage":
+						stat.Type = "volts"
+					}
+				case "value":
+					if v = re.FindString(prop.Value); v == "" {
+						continue loop
+					}
+					stat.Value, _ = strconv.ParseFloat(v, 64)
+				}
+			}
+			res[stat.Name] = stat
 		}
 	}
 	return res, nil
