@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
-	"github.com/michep/snap-plugin-collector-p2000/parser"
+	"github.com/michep/snap-plugin-collector-p2000/client"
 )
 
 type SensorStatus struct {
-	stats map[string]parser.SensorStatus
+	stats map[string]client.SensorStatus
 }
 
 func (s SensorStatus) GetMetricNamespaces() []plugin.Namespace {
@@ -24,7 +24,7 @@ func (s SensorStatus) GetMetricNamespaces() []plugin.Namespace {
 	return ns
 }
 
-func (s *SensorStatus) GetMetricValues(metric plugin.Metric, now time.Time, client *parser.Client) ([]plugin.Metric, error) {
+func (s *SensorStatus) GetMetricValues(metric plugin.Metric, now time.Time, client *client.Client) ([]plugin.Metric, error) {
 	var err error
 	var mts []plugin.Metric
 

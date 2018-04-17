@@ -7,7 +7,13 @@ import (
 )
 
 func TestPlugin_GetMetricTypes(t *testing.T) {
-	p := NewCollector(&DiskStatistics{})
+	p := NewCollector(
+		&DiskStatistics{},
+		&VdiskStatistics{},
+		&ControllerStatistics{},
+		&SensorStatus{},
+		&HostportStatistics{},
+	)
 	cfg := plugin.NewConfig()
 	mts, _ := p.GetMetricTypes(cfg)
 	fmt.Printf("%+v\n", len(mts))

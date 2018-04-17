@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
-	"github.com/michep/snap-plugin-collector-p2000/parser"
+	"github.com/michep/snap-plugin-collector-p2000/client"
 )
 
 const (
@@ -18,12 +18,12 @@ const (
 
 type p2000Statistics interface {
 	GetMetricNamespaces() []plugin.Namespace
-	GetMetricValues(plugin.Metric, time.Time, *parser.Client) ([]plugin.Metric, error)
+	GetMetricValues(plugin.Metric, time.Time, *client.Client) ([]plugin.Metric, error)
 	Reset()
 }
 
 type Plugin struct {
-	client *parser.Client
+	client *client.Client
 	system string
 	stats  []p2000Statistics
 }
@@ -62,7 +62,7 @@ func (p *Plugin) CollectMetrics(metrics []plugin.Metric) ([]plugin.Metric, error
 			return nil, err
 		}
 		p.system = u.Hostname()
-		p.client = parser.NewClient(server, authstr)
+		p.client = client.NewClient(server, authstr)
 	}
 
 	now := time.Now()

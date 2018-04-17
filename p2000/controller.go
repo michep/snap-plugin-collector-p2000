@@ -4,11 +4,11 @@ import (
 	"time"
 
 	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
-	"github.com/michep/snap-plugin-collector-p2000/parser"
+	"github.com/michep/snap-plugin-collector-p2000/client"
 )
 
 type ControllerStatistics struct {
-	stats map[string]parser.ControllerStatistics
+	stats map[string]client.ControllerStatistics
 }
 
 func (s ControllerStatistics) GetMetricNamespaces() []plugin.Namespace {
@@ -23,7 +23,7 @@ func (s ControllerStatistics) GetMetricNamespaces() []plugin.Namespace {
 	return ns
 }
 
-func (s *ControllerStatistics) GetMetricValues(metric plugin.Metric, now time.Time, client *parser.Client) ([]plugin.Metric, error) {
+func (s *ControllerStatistics) GetMetricValues(metric plugin.Metric, now time.Time, client *client.Client) ([]plugin.Metric, error) {
 	var err error
 	var mts []plugin.Metric
 
