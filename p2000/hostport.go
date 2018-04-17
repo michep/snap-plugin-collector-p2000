@@ -1,11 +1,17 @@
 package p2000
 
 import (
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"time"
+
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
+	"github.com/michep/snap-plugin-collector-p2000/parser"
 )
 
-func (p Plugin) createHostPortNamespaces() []plugin.Namespace {
+type HostportStatistics struct {
+	stats map[string]parser.HostPortStatistics
+}
+
+func (s HostportStatistics) GetMetricNamespaces() []plugin.Namespace {
 	var ns []plugin.Namespace
 	metrics := []string{"iops", "bytespersecond", "numberofreads", "numberofwrites", "dataread", "datawritten", "queuedepth"}
 	for _, m := range metrics {
@@ -17,17 +23,22 @@ func (p Plugin) createHostPortNamespaces() []plugin.Namespace {
 	return ns
 }
 
-func (p *Plugin) getHostPortkMetricValues(metric plugin.Metric, now time.Time) ([]plugin.Metric, error) {
+func (s *HostportStatistics) GetMetricValues(metric plugin.Metric, now time.Time, client *parser.Client) ([]plugin.Metric, error) {
 	var err error
 	var mts []plugin.Metric
-	if p.hostportstat == nil {
-		p.hostportstat, err = p.client.GetHostPortStatistics()
+
+	if metric.Namespace[2].Value != "hostport" {
+		return nil, nil
+	}
+
+	if s.stats == nil {
+		s.stats, err = client.GetHostPortStatistics()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	for name, stat := range p.hostportstat {
+	for name, stat := range s.stats {
 		ns := plugin.NewNamespace()
 		tags := make(map[string]string)
 		ns = append(ns, metric.Namespace...)
@@ -56,4 +67,8 @@ func (p *Plugin) getHostPortkMetricValues(metric plugin.Metric, now time.Time) (
 	}
 
 	return mts, nil
+}
+
+func (s *HostportStatistics) Reset() {
+	s.stats = nil
 }

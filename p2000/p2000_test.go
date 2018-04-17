@@ -7,14 +7,20 @@ import (
 )
 
 func TestPlugin_GetMetricTypes(t *testing.T) {
-	p := NewCollector()
+	p := NewCollector(&DiskStatistics{})
 	cfg := plugin.NewConfig()
 	mts, _ := p.GetMetricTypes(cfg)
 	fmt.Printf("%+v\n", len(mts))
 }
 
 func TestPlugin_CollectMetrics(t *testing.T) {
-	p := NewCollector()
+	p := NewCollector(
+		&DiskStatistics{},
+		&VdiskStatistics{},
+		&ControllerStatistics{},
+		&SensorStatus{},
+		&HostportStatistics{},
+	)
 	cfg := plugin.NewConfig()
 	cfg[param_server] = "http://172.16.18.31:80"
 	cfg[param_authstr] = "0e4997806bb599dec1864e034f9e59f9"

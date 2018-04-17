@@ -1,11 +1,17 @@
 package p2000
 
 import (
-	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
 	"time"
+
+	"github.com/intelsdi-x/snap-plugin-lib-go/v1/plugin"
+	"github.com/michep/snap-plugin-collector-p2000/parser"
 )
 
-func (p Plugin) createDiskNamespaces() []plugin.Namespace {
+type DiskStatistics struct {
+	stats map[string]parser.DiskStatistics
+}
+
+func (s DiskStatistics) GetMetricNamespaces() []plugin.Namespace {
 	var ns []plugin.Namespace
 	metrics := []string{"iops", "bytespersecond", "numberofreads", "numberofwrites", "dataread", "datawritten", "totaldatatransferred", "health", "queuedepth"}
 	for _, m := range metrics {
@@ -17,17 +23,22 @@ func (p Plugin) createDiskNamespaces() []plugin.Namespace {
 	return ns
 }
 
-func (p *Plugin) getDiskMetricValues(metric plugin.Metric, now time.Time) ([]plugin.Metric, error) {
+func (s *DiskStatistics) GetMetricValues(metric plugin.Metric, now time.Time, client *parser.Client) ([]plugin.Metric, error) {
 	var err error
 	var mts []plugin.Metric
-	if p.diskstat == nil {
-		p.diskstat, err = p.client.GetDiskStatistics()
+
+	if metric.Namespace[2].Value != "drive" {
+		return nil, nil
+	}
+
+	if s.stats == nil {
+		s.stats, err = client.GetDiskStatistics()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	for name, stat := range p.diskstat {
+	for name, stat := range s.stats {
 		ns := plugin.NewNamespace()
 		tags := make(map[string]string)
 		ns = append(ns, metric.Namespace...)
@@ -60,4 +71,8 @@ func (p *Plugin) getDiskMetricValues(metric plugin.Metric, now time.Time) ([]plu
 	}
 
 	return mts, nil
+}
+
+func (s *DiskStatistics) Reset() {
+	s.stats = nil
 }
